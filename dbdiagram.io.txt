@@ -1,0 +1,227 @@
+
+Table Авторы {
+  id_автора int [pk, increment]
+  фамилия varchar(50) [not null]
+  имя varchar(50) [not null]
+  отчество varchar(50)
+  страна varchar(50)
+  дата_рождения date
+  биография text
+}
+
+Table Жанры {
+  id_жанра int [pk, increment]
+  название varchar(100) [not null]
+  описание text
+  код_ББК varchar(20)
+}
+
+Table Издательства {
+  id_издательства int [pk, increment]
+  название varchar(100) [not null]
+  город varchar(50)
+  телефон varchar(20)
+  email varchar(50)
+  сайт varchar(100)
+}
+
+Table Категории_читателей {
+  id_категории int [pk, increment]
+  название varchar(50) [not null]
+  макс_книг int [default: 5]
+  срок_дней int [default: 14]
+  стоимость_штрафа_день decimal(10,2) [default: 0]
+}
+
+Table Статусы_экземпляра {
+  id_статуса int [pk, increment]
+  название varchar(50) [not null]
+  описание text
+  доступен_для_выдачи boolean [default: false]
+}
+
+Table Типы_МБА {
+  id_типа int [pk, increment]
+  название varchar(50) [not null]
+  срок_дней int
+  стоимость decimal(10,2)
+}
+
+Table Сотрудники {
+  id_сотрудника int [pk, increment]
+  фамилия varchar(50) [not null]
+  имя varchar(50) [not null]
+  отчество varchar(50)
+  должность varchar(50)
+  телефон varchar(20)
+  дата_приёма date
+}
+
+Table Читатели {
+  id_читателя int [pk, increment]
+  фамилия varchar(50) [not null]
+  имя varchar(50) [not null]
+  отчество varchar(50)
+  дата_рождения date
+  телефон varchar(20)
+  email varchar(50)
+  id_категории int [ref: > Категории_читателей.id_категории]
+  дата_регистрации date [default: `CURRENT_DATE`]
+  блокировка boolean [default: false]
+}
+
+Table Библиотеки_партнёры {
+  id_библиотеки int [pk, increment]
+  название varchar(200) [not null]
+  город varchar(50)
+  контакты varchar(200)
+}
+
+Table Книги {
+  id_книги int [pk, increment]
+  название varchar(200) [not null]
+  isbn varchar(20)
+  год_издания int
+  количество_страниц int
+  цена decimal(10,2)
+  id_жанра int [ref: > Жанры.id_жанра]
+  id_издательства int [ref: > Издательства.id_издательства]
+  язык varchar(30)
+  аннотация text
+}
+
+Table Книга_Автор {
+  id_записи int [pk, increment]
+  id_книги int [ref: > Книги.id_книги]
+  id_автора int [ref: > Авторы.id_автора]
+}
+
+Table Экземпляры {
+  id_экземпляра int [pk, increment]
+  инвентарный_номер varchar(20) [unique, not null]
+  id_книги int [ref: > Книги.id_книги]
+  id_статуса int [ref: > Статусы_экземпляра.id_статуса]
+  дата_поступления date
+  место_хранения varchar(50)
+}
+
+Table Поступления {
+  id_поступления int [pk, increment]
+  дата_поступления date [not null]
+  id_издательства int [ref: > Издательства.id_издательства]
+  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
+  номер_накладной varchar(30)
+  сумма_партии decimal(12,2)
+  количество_книг int
+}
+
+Table Поступление_Экземпляр {
+  id_записи int [pk, increment]
+  id_поступления int [ref: > Поступления.id_поступления]
+  id_экземпляра int [ref: > Экземпляры.id_экземпляра]
+  количество int
+  цена_экземпляра decimal(10,2)
+}
+
+Table Выдачи {
+  id_выдачи int [pk, increment]
+  id_читателя int [ref: > Читатели.id_читателя]
+  id_экземпляра int [ref: > Экземпляры.id_экземпляра]
+  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
+  дата_выдачи date [default: `CURRENT_DATE`]
+  дата_возврата_план date
+  дата_возврата_факт date
+  продления int [default: 0]
+  сумма_штрафа decimal(10,2) [default: 0]
+}
+
+Table Возвраты {
+  id_возврата int [pk, increment]
+  id_выдачи int [ref: > Выдачи.id_выдачи]
+  дата_возврата date [default: `CURRENT_DATE`]
+  состояние_книги varchar(50)
+  просрочка_дней int
+}
+
+Table Задолженности {
+  id_задолженности int [pk, increment]
+  id_выдачи int [ref: > Выдачи.id_выдачи]
+  id_читателя int [ref: > Читатели.id_читателя]
+  сумма_штрафа decimal(10,2)
+  дата_начисления date [default: `CURRENT_DATE`]
+  дата_оплаты date
+  оплачено boolean [default: false]
+}
+
+Table МБА_Заказы {
+  id_заказа int [pk, increment]
+  id_читателя int [ref: > Читатели.id_читателя]
+  id_типа int [ref: > Типы_МБА.id_типа]
+  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
+  дата_заказа date [default: `CURRENT_DATE`]
+  дата_выполнения date
+  статус varchar(30)
+  стоимость decimal(10,2)
+}
+
+Table МБА_Заказ_Книга {
+  id_записи int [pk, increment]
+  id_заказа int [ref: > МБА_Заказы.id_заказа]
+  id_книги int [ref: > Книги.id_книги]
+  id_библиотеки int [ref: > Библиотеки_партнёры.id_библиотеки]
+  количество int
+}
+
+Table Бронирования {
+  id_брони int [pk, increment]
+  id_читателя int [ref: > Читатели.id_читателя]
+  id_книги int [ref: > Книги.id_книги]
+  дата_брони date [default: `CURRENT_DATE`]
+  дата_истечения date
+  статус varchar(30)
+}
+
+Table История_статусов {
+  id_записи int [pk, increment]
+  id_экземпляра int [ref: > Экземпляры.id_экземпляра]
+  id_статуса int [ref: > Статусы_экземпляра.id_статуса]
+  дата_изменения timestamp [default: `CURRENT_TIMESTAMP`]
+  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
+  комментарий text
+}
+
+TableGroup Справочники {
+  Авторы
+  Жанры
+  Издательства
+  Категории_читателей
+  Статусы_экземпляра
+  Типы_МБА
+  Сотрудники
+  Читатели
+  Библиотеки_партнёры
+}
+
+TableGroup Каталог {
+  Книги
+  Книга_Автор
+  Экземпляры
+  История_статусов
+}
+
+TableGroup Поступления {
+  Поступления
+  Поступление_Экземпляр
+}
+
+TableGroup Обслуживание {
+  Выдачи
+  Возвраты
+  Задолженности
+  Бронирования
+}
+
+TableGroup МБА {
+  МБА_Заказы
+  МБА_Заказ_Книга
+}
