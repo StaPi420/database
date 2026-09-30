@@ -1,227 +1,226 @@
+Table Authors { 
+  id_author int [pk, increment] 
+  last_name varchar(50) [not null] 
+  first_name varchar(50) [not null] 
+  middle_name varchar(50) 
+  country varchar(50) 
+  birth_date date 
+  biography text 
+} 
 
-Table Авторы {
-  id_автора int [pk, increment]
-  фамилия varchar(50) [not null]
-  имя varchar(50) [not null]
-  отчество varchar(50)
-  страна varchar(50)
-  дата_рождения date
-  биография text
-}
+Table Genres { 
+  id_genre int [pk, increment] 
+  name varchar(100) [not null] 
+  description text 
+  bbk_code varchar(20) 
+} 
 
-Table Жанры {
-  id_жанра int [pk, increment]
-  название varchar(100) [not null]
-  описание text
-  код_ББК varchar(20)
-}
+Table Publishers { 
+  id_publisher int [pk, increment] 
+  name varchar(100) [not null] 
+  city varchar(50) 
+  phone varchar(20) 
+  email varchar(50) 
+  website varchar(100) 
+} 
 
-Table Издательства {
-  id_издательства int [pk, increment]
-  название varchar(100) [not null]
-  город varchar(50)
-  телефон varchar(20)
-  email varchar(50)
-  сайт varchar(100)
-}
+Table Reader_Categories { 
+  id_category int [pk, increment] 
+  name varchar(50) [not null] 
+  max_books int [default: 5] 
+  loan_days int [default: 14] 
+  penalty_per_day decimal(10,2) [default: 0] 
+} 
 
-Table Категории_читателей {
-  id_категории int [pk, increment]
-  название varchar(50) [not null]
-  макс_книг int [default: 5]
-  срок_дней int [default: 14]
-  стоимость_штрафа_день decimal(10,2) [default: 0]
-}
+Table Copy_Statuses { 
+  id_status int [pk, increment] 
+  name varchar(50) [not null] 
+  description text 
+  available_for_loan boolean [default: false] 
+} 
 
-Table Статусы_экземпляра {
-  id_статуса int [pk, increment]
-  название varchar(50) [not null]
-  описание text
-  доступен_для_выдачи boolean [default: false]
-}
+Table ILL_Types { 
+  id_type int [pk, increment] 
+  name varchar(50) [not null] 
+  days int 
+  cost decimal(10,2) 
+} 
 
-Table Типы_МБА {
-  id_типа int [pk, increment]
-  название varchar(50) [not null]
-  срок_дней int
-  стоимость decimal(10,2)
-}
+Table Employees { 
+  id_employee int [pk, increment] 
+  last_name varchar(50) [not null] 
+  first_name varchar(50) [not null] 
+  middle_name varchar(50) 
+  position varchar(50) 
+  phone varchar(20) 
+  hire_date date 
+} 
 
-Table Сотрудники {
-  id_сотрудника int [pk, increment]
-  фамилия varchar(50) [not null]
-  имя varchar(50) [not null]
-  отчество varchar(50)
-  должность varchar(50)
-  телефон varchar(20)
-  дата_приёма date
-}
+Table Readers { 
+  id_reader int [pk, increment] 
+  last_name varchar(50) [not null] 
+  first_name varchar(50) [not null] 
+  middle_name varchar(50) 
+  birth_date date 
+  phone varchar(20) 
+  email varchar(50) 
+  id_category int [ref: > Reader_Categories.id_category] 
+  registration_date date
+  blocked boolean [default: false] 
+} 
 
-Table Читатели {
-  id_читателя int [pk, increment]
-  фамилия varchar(50) [not null]
-  имя varchar(50) [not null]
-  отчество varchar(50)
-  дата_рождения date
-  телефон varchar(20)
-  email varchar(50)
-  id_категории int [ref: > Категории_читателей.id_категории]
-  дата_регистрации date [default: `CURRENT_DATE`]
-  блокировка boolean [default: false]
-}
+Table Partner_Libraries { 
+  id_library int [pk, increment] 
+  name varchar(200) [not null] 
+  city varchar(50) 
+  contacts varchar(200) 
+} 
 
-Table Библиотеки_партнёры {
-  id_библиотеки int [pk, increment]
-  название varchar(200) [not null]
-  город varchar(50)
-  контакты varchar(200)
-}
+Table Books { 
+  id_book int [pk, increment] 
+  title varchar(200) [not null] 
+  isbn varchar(20) 
+  publication_year int 
+  page_count int 
+  price decimal(10,2) 
+  id_genre int [ref: > Genres.id_genre] 
+  id_publisher int [ref: > Publishers.id_publisher] 
+  language varchar(30) 
+  annotation text 
+} 
 
-Table Книги {
-  id_книги int [pk, increment]
-  название varchar(200) [not null]
-  isbn varchar(20)
-  год_издания int
-  количество_страниц int
-  цена decimal(10,2)
-  id_жанра int [ref: > Жанры.id_жанра]
-  id_издательства int [ref: > Издательства.id_издательства]
-  язык varchar(30)
-  аннотация text
-}
+Table Book_Author { 
+  id_record int [pk, increment] 
+  id_book int [ref: > Books.id_book] 
+  id_author int [ref: > Authors.id_author] 
+} 
 
-Table Книга_Автор {
-  id_записи int [pk, increment]
-  id_книги int [ref: > Книги.id_книги]
-  id_автора int [ref: > Авторы.id_автора]
-}
+Table Copies { 
+  id_copy int [pk, increment] 
+  inventory_number varchar(20) [unique, not null] 
+  id_book int [ref: > Books.id_book] 
+  id_status int [ref: > Copy_Statuses.id_status] 
+  arrival_date date 
+  storage_location varchar(50) 
+} 
 
-Table Экземпляры {
-  id_экземпляра int [pk, increment]
-  инвентарный_номер varchar(20) [unique, not null]
-  id_книги int [ref: > Книги.id_книги]
-  id_статуса int [ref: > Статусы_экземпляра.id_статуса]
-  дата_поступления date
-  место_хранения varchar(50)
-}
+Table Acquisitions { 
+  id_acquisition int [pk, increment] 
+  acquisition_date date [not null] 
+  id_publisher int [ref: > Publishers.id_publisher] 
+  id_employee int [ref: > Employees.id_employee] 
+  invoice_number varchar(30) 
+  batch_amount decimal(12,2) 
+  book_count int 
+} 
 
-Table Поступления {
-  id_поступления int [pk, increment]
-  дата_поступления date [not null]
-  id_издательства int [ref: > Издательства.id_издательства]
-  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
-  номер_накладной varchar(30)
-  сумма_партии decimal(12,2)
-  количество_книг int
-}
+Table Acquisition_Copy { 
+  id_record int [pk, increment] 
+  id_acquisition int [ref: > Acquisitions.id_acquisition] 
+  id_copy int [ref: > Copies.id_copy] 
+  quantity int 
+  copy_price decimal(10,2) 
+} 
 
-Table Поступление_Экземпляр {
-  id_записи int [pk, increment]
-  id_поступления int [ref: > Поступления.id_поступления]
-  id_экземпляра int [ref: > Экземпляры.id_экземпляра]
-  количество int
-  цена_экземпляра decimal(10,2)
-}
+Table Loans { 
+  id_loan int [pk, increment] 
+  id_reader int [ref: > Readers.id_reader] 
+  id_copy int [ref: > Copies.id_copy] 
+  id_employee int [ref: > Employees.id_employee] 
+  loan_date date
+  due_date date 
+  actual_return_date date 
+  renewals int [default: 0] 
+  penalty_amount decimal(10,2) [default: 0] 
+} 
 
-Table Выдачи {
-  id_выдачи int [pk, increment]
-  id_читателя int [ref: > Читатели.id_читателя]
-  id_экземпляра int [ref: > Экземпляры.id_экземпляра]
-  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
-  дата_выдачи date [default: `CURRENT_DATE`]
-  дата_возврата_план date
-  дата_возврата_факт date
-  продления int [default: 0]
-  сумма_штрафа decimal(10,2) [default: 0]
-}
+Table Returns { 
+  id_return int [pk, increment] 
+  id_loan int [ref: > Loans.id_loan] 
+  return_date date
+  book_condition varchar(50) 
+  overdue_days int 
+} 
 
-Table Возвраты {
-  id_возврата int [pk, increment]
-  id_выдачи int [ref: > Выдачи.id_выдачи]
-  дата_возврата date [default: `CURRENT_DATE`]
-  состояние_книги varchar(50)
-  просрочка_дней int
-}
+Table Debts { 
+  id_debt int [pk, increment] 
+  id_loan int [ref: > Loans.id_loan] 
+  id_reader int [ref: > Readers.id_reader] 
+  penalty_amount decimal(10,2) 
+  accrual_date date
+  payment_date date 
+  paid boolean [default: false] 
+} 
 
-Table Задолженности {
-  id_задолженности int [pk, increment]
-  id_выдачи int [ref: > Выдачи.id_выдачи]
-  id_читателя int [ref: > Читатели.id_читателя]
-  сумма_штрафа decimal(10,2)
-  дата_начисления date [default: `CURRENT_DATE`]
-  дата_оплаты date
-  оплачено boolean [default: false]
-}
+Table ILL_Orders { 
+  id_order int [pk, increment] 
+  id_reader int [ref: > Readers.id_reader] 
+  id_type int [ref: > ILL_Types.id_type] 
+  id_employee int [ref: > Employees.id_employee] 
+  order_date date
+  completion_date date 
+  status varchar(30) 
+  cost decimal(10,2) 
+} 
 
-Table МБА_Заказы {
-  id_заказа int [pk, increment]
-  id_читателя int [ref: > Читатели.id_читателя]
-  id_типа int [ref: > Типы_МБА.id_типа]
-  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
-  дата_заказа date [default: `CURRENT_DATE`]
-  дата_выполнения date
-  статус varchar(30)
-  стоимость decimal(10,2)
-}
+Table ILL_Order_Book { 
+  id_record int [pk, increment] 
+  id_order int [ref: > ILL_Orders.id_order] 
+  id_book int [ref: > Books.id_book] 
+  id_library int [ref: > Partner_Libraries.id_library] 
+  quantity int 
+} 
 
-Table МБА_Заказ_Книга {
-  id_записи int [pk, increment]
-  id_заказа int [ref: > МБА_Заказы.id_заказа]
-  id_книги int [ref: > Книги.id_книги]
-  id_библиотеки int [ref: > Библиотеки_партнёры.id_библиотеки]
-  количество int
-}
+Table Reservations { 
+  id_reservation int [pk, increment] 
+  id_reader int [ref: > Readers.id_reader] 
+  id_book int [ref: > Books.id_book] 
+  reservation_date date
+  expiration_date date 
+  status varchar(30) 
+} 
 
-Table Бронирования {
-  id_брони int [pk, increment]
-  id_читателя int [ref: > Читатели.id_читателя]
-  id_книги int [ref: > Книги.id_книги]
-  дата_брони date [default: `CURRENT_DATE`]
-  дата_истечения date
-  статус varchar(30)
-}
+Table Status_History { 
+  id_record int [pk, increment] 
+  id_copy int [ref: > Copies.id_copy] 
+  id_status int [ref: > Copy_Statuses.id_status] 
+  change_date timestamp
+  id_employee int [ref: > Employees.id_employee] 
+  comment text 
+} 
 
-Table История_статусов {
-  id_записи int [pk, increment]
-  id_экземпляра int [ref: > Экземпляры.id_экземпляра]
-  id_статуса int [ref: > Статусы_экземпляра.id_статуса]
-  дата_изменения timestamp [default: `CURRENT_TIMESTAMP`]
-  id_сотрудника int [ref: > Сотрудники.id_сотрудника]
-  комментарий text
-}
+TableGroup Reference_Tables { 
+  Authors 
+  Genres 
+  Publishers 
+  Reader_Categories 
+  Copy_Statuses 
+  ILL_Types 
+  Employees 
+  Readers 
+  Partner_Libraries 
+} 
 
-TableGroup Справочники {
-  Авторы
-  Жанры
-  Издательства
-  Категории_читателей
-  Статусы_экземпляра
-  Типы_МБА
-  Сотрудники
-  Читатели
-  Библиотеки_партнёры
-}
+TableGroup Catalog { 
+  Books 
+  Book_Author 
+  Copies 
+  Status_History 
+} 
 
-TableGroup Каталог {
-  Книги
-  Книга_Автор
-  Экземпляры
-  История_статусов
-}
+TableGroup Acquisitions { 
+  Acquisitions 
+  Acquisition_Copy 
+} 
 
-TableGroup Поступления {
-  Поступления
-  Поступление_Экземпляр
-}
+TableGroup Circulation { 
+  Loans 
+  Returns 
+  Debts 
+  Reservations 
+} 
 
-TableGroup Обслуживание {
-  Выдачи
-  Возвраты
-  Задолженности
-  Бронирования
-}
-
-TableGroup МБА {
-  МБА_Заказы
-  МБА_Заказ_Книга
+TableGroup ILL { 
+  ILL_Orders 
+  ILL_Order_Book 
 }
