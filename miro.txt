@@ -1,25 +1,23 @@
 erDiagram
+
     AUTHORS {
         int id_author PK
         varchar(50) last_name
         varchar(50) first_name
-        varchar(50) country
         date birth_date
-        text biography
     }
+
     GENRES {
         int id_genre PK
         varchar(100) name
-        text description
     }
+
     PUBLISHERS {
         int id_publisher PK
         varchar(100) name
         varchar(50) city
-        varchar(20) phone
-        varchar(50) email
-        varchar(100) website
     }
+
     READER_CATEGORIES {
         int id_category PK
         varchar(50) name
@@ -27,25 +25,27 @@ erDiagram
         int loan_days
         decimal(10,2) penalty_per_day
     }
+
     COPY_STATUSES {
         int id_status PK
         varchar(50) name
-        text description
         boolean available_for_loan
     }
+
     ILL_TYPES {
         int id_type PK
         varchar(50) name
         int days
         decimal(10,2) cost
     }
+
     EMPLOYEES {
         int id_employee PK
         varchar(50) last_name
         varchar(50) first_name
         varchar(50) position
-        date hire_date
     }
+
     READERS {
         int id_reader PK
         varchar(50) last_name
@@ -53,30 +53,31 @@ erDiagram
         date birth_date
         int id_category FK
         date registration_date
-        boolean blocked
     }
+
     PARTNER_LIBRARIES {
         int id_library PK
         varchar(200) name
         varchar(50) city
     }
+
     BOOKS {
         int id_book PK
         varchar(200) title
         varchar(20) isbn
         int publication_year
         int page_count
-        decimal(10,2) price
         int id_genre FK
         int id_publisher FK
         varchar(30) language
-        text annotation
     }
+
     BOOK_AUTHOR {
         int id_record PK
         int id_book FK
         int id_author FK
     }
+
     COPIES {
         int id_copy PK
         varchar(20) inventory_number
@@ -84,22 +85,7 @@ erDiagram
         int id_status FK
         date arrival_date
     }
-    ACQUISITIONS {
-        int id_acquisition PK
-        date acquisition_date
-        int id_publisher FK
-        int id_employee FK
-        int cost
-        decimal(12,2) batch_amount
-        int book_count
-    }
-    ACQUISITION_COPY {
-        int id_record PK
-        int id_acquisition FK
-        int id_copy FK
-        int quantity
-        decimal(10,2) copy_price
-    }
+
     LOANS {
         int id_loan PK
         int id_reader FK
@@ -108,25 +94,9 @@ erDiagram
         date loan_date
         date due_date
         date actual_return_date
-        int renewals
         decimal(10,2) penalty_amount
     }
-    RETURNS {
-        int id_return PK
-        int id_loan FK
-        date return_date
-        varchar(50) book_condition
-        int overdue_days
-    }
-    DEBTS {
-        int id_debt PK
-        int id_loan FK
-        int id_reader FK
-        decimal(10,2) penalty_amount
-        date accrual_date
-        date payment_date
-        boolean paid
-    }
+
     ILL_ORDERS {
         int id_order PK
         int id_reader FK
@@ -137,6 +107,7 @@ erDiagram
         varchar(30) status
         decimal(10,2) cost
     }
+
     ILL_ORDER_BOOK {
         int id_record PK
         int id_order FK
@@ -144,6 +115,7 @@ erDiagram
         int id_library FK
         int quantity
     }
+
     RESERVATIONS {
         int id_reservation PK
         int id_reader FK
@@ -152,41 +124,30 @@ erDiagram
         date expiration_date
         varchar(30) status
     }
-    STATUS_HISTORY {
-        int id_record PK
-        int id_copy FK
-        int id_status FK
-        timestamp change_date
-        int id_employee FK
-        text comment
-    }
 
-    %% Связи (Relationships)
+
     READER_CATEGORIES ||--o{ READERS : "определяет"
+
     GENRES ||--o{ BOOKS : "классифицирует"
     PUBLISHERS ||--o{ BOOKS : "издает"
+
     BOOKS ||--o{ BOOK_AUTHOR : "имеет"
     AUTHORS ||--o{ BOOK_AUTHOR : "пишет"
+
     BOOKS ||--o{ COPIES : "имеет"
     COPY_STATUSES ||--o{ COPIES : "определяет"
-    PUBLISHERS ||--o{ ACQUISITIONS : "поставляет"
-    EMPLOYEES ||--o{ ACQUISITIONS : "оформляет"
-    ACQUISITIONS ||--o{ ACQUISITION_COPY : "содержит"
-    COPIES ||--o{ ACQUISITION_COPY : "включается в"
+
     READERS ||--o{ LOANS : "берет"
-    COPIES ||--o{ LOANS : "выдается в"
+    COPIES ||--o{ LOANS : "выдается"
     EMPLOYEES ||--o{ LOANS : "оформляет"
-    LOANS ||--o| RETURNS : "завершается"
-    LOANS ||--o{ DEBTS : "генерирует"
-    READERS ||--o{ DEBTS : "имеет"
+
     READERS ||--o{ ILL_ORDERS : "оформляет"
     ILL_TYPES ||--o{ ILL_ORDERS : "определяет"
     EMPLOYEES ||--o{ ILL_ORDERS : "обрабатывает"
+
     ILL_ORDERS ||--o{ ILL_ORDER_BOOK : "содержит"
-    BOOKS ||--o{ ILL_ORDER_BOOK : "запрашивается в"
-    PARTNER_LIBRARIES ||--o{ ILL_ORDER_BOOK : "исполняет"
+    BOOKS ||--o{ ILL_ORDER_BOOK : "запрашивается"
+    PARTNER_LIBRARIES ||--o{ ILL_ORDER_BOOK : "предоставляет"
+
     READERS ||--o{ RESERVATIONS : "создает"
-    BOOKS ||--o{ RESERVATIONS : "резервируется в"
-    COPIES ||--o{ STATUS_HISTORY : "отслеживается в"
-    COPY_STATUSES ||--o{ STATUS_HISTORY : "фиксируется в"
-    EMPLOYEES ||--o{ STATUS_HISTORY : "обновляет"
+    BOOKS ||--o{ RESERVATIONS : "резервируется"
