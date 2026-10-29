@@ -135,13 +135,19 @@ JOIN reader_categories rc ON rc.category_name = v.category_name;
 
 INSERT INTO copies
     (inventory_number, id_edition, arrival_date, last_loan_date)
-SELECT
-    'INV-' || LPAD(e.id_edition::TEXT, 3, '0') || '-' || n.num,
-    e.id_edition,
-    DATE '2024-01-15' + (e.id_edition % 180),
-    NULL
-FROM editions e
-CROSS JOIN (VALUES (1), (2)) AS n(num);
+VALUES
+    ('INV-001', 1, '2024-01-15', NULL),
+    ('INV-002', 1, '2024-01-15', NULL),
+    ('INV-003', 2, '2024-02-10', NULL),
+    ('INV-004', 2, '2024-02-10', NULL),
+    ('INV-005', 3, '2024-03-20', NULL),
+    ('INV-006', 4, '2024-04-05', NULL),
+    ('INV-007', 5, '2024-04-12', NULL),
+    ('INV-008', 6, '2024-05-01', NULL),
+    ('INV-009', 7, '2024-05-15', NULL),
+    ('INV-010', 8, '2024-06-01', NULL),
+    ('INV-011', 9, '2024-06-10', NULL),
+    ('INV-012', 10, '2024-07-01', NULL);
 
 INSERT INTO loans
     (id_reader, id_copy, id_employee, loan_date,
