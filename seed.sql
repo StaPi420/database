@@ -3,7 +3,8 @@ INSERT INTO reader_categories (category_name, max_books, loan_days) VALUES
 ('Преподаватель', 10, 30),
 ('Школьник', 3, 14),
 ('Пенсионер', 5, 21),
-('Обычный читатель', 5, 21);
+('Обычный читатель', 5, 21),
+('Постоянный читатель', 10, 30);
 
 INSERT INTO ill_types (ill_type_name, days) VALUES
 ('Межбиблиотечный абонемент', 30),
@@ -54,6 +55,8 @@ INSERT INTO books (title, id_genre) VALUES
 ('Чистый код', (SELECT id_genre FROM genres WHERE name = 'Программирование')),
 ('Три товарища', (SELECT id_genre FROM genres WHERE name = 'Роман')),
 ('Степной волк', (SELECT id_genre FROM genres WHERE name = 'Философия'));
+
+INSERT INTO books (title) values ('Анна Каренина');
 
 INSERT INTO book_authors (id_book, id_author)
 SELECT b.id_book, a.id_author
@@ -133,21 +136,24 @@ FROM (VALUES
 ) AS v(first_name, last_name, birth_date, reg_date, category_name)
 JOIN reader_categories rc ON rc.category_name = v.category_name;
 
+INSERT INTO readers
+    (first_name, last_name, birth_date, registration_date)
+SELECT
+    v.first_name, v.last_name, v.birth_date::DATE, v.reg_date::DATE
+FROM (VALUES
+    ('Кирилл', 'Образков', '2006-03-15', '2025-09-01')
+
+) AS v(first_name, last_name, birth_date, reg_date)
+
 INSERT INTO copies
     (inventory_number, id_edition, arrival_date, last_loan_date)
-VALUES
-    ('INV-001', 1, '2024-01-15', NULL),
-    ('INV-002', 1, '2024-01-15', NULL),
-    ('INV-003', 2, '2024-02-10', NULL),
-    ('INV-004', 2, '2024-02-10', NULL),
-    ('INV-005', 3, '2024-03-20', NULL),
-    ('INV-006', 4, '2024-04-05', NULL),
-    ('INV-007', 5, '2024-04-12', NULL),
-    ('INV-008', 6, '2024-05-01', NULL),
-    ('INV-009', 7, '2024-05-15', NULL),
-    ('INV-010', 8, '2024-06-01', NULL),
-    ('INV-011', 9, '2024-06-10', NULL),
-    ('INV-012', 10, '2024-07-01', NULL);
+SELECT
+    'INV-' || LPAD(e.id_edition::TEXT, 3, '0') || '-' || n.num,
+    e.id_edition,
+    DATE '2024-01-15' + (e.id_edition % 180),
+    NULL
+FROM editions e
+CROSS JOIN (VALUES (1), (2)) AS n(num);
 
 INSERT INTO loans
     (id_reader, id_copy, id_employee, loan_date,
@@ -172,6 +178,88 @@ JOIN copies c ON c.id_edition = v.edition_id
         WHERE c2.id_edition = v.edition_id
     )
 JOIN employees emp ON emp.id_employee = v.employee_id;
+
+INSERT INTO loans
+    (id_reader, id_copy, id_employee, loan_date,
+     due_date, actual_return_date)
+
+SELECT
+    r.id_reader,
+    c.id_copy,
+    emp.id_employee,
+    v.loan_date::DATE,
+    v.due_date::DATE,
+    v.return_date::DATE
+
+FROM (VALUES
+    -- Первое издание
+    ('Иван', 'Соколов', 1, 1, 1, '2026-09-01', '2026-09-15', '2026-09-12'),
+    ('Мария', 'Волкова', 1, 2, 2, '2026-10-01', '2026-10-15', '2026-10-14'),
+
+    -- Второе издание
+    ('Павел', 'Морозов', 2, 1, 1, '2026-10-10', '2026-11-09', NULL),
+    ('Артём', 'Лебедев', 2, 2, 3, '2026-10-20', '2026-11-03', NULL),
+
+    -- Третье издание
+    ('Екатерина', 'Попова', 3, 1, 4, '2026-08-01', '2026-08-22', '2026-08-20'),
+    ('Иван', 'Соколов', 3, 2, 2, '2026-09-15', '2026-09-29', '2026-09-28'),
+
+    -- Четвёртое издание
+    ('Мария', 'Волкова', 4, 1, 1, '2026-10-05', '2026-10-19', '2026-10-18'),
+    ('Павел', 'Морозов', 4, 2, 3, '2026-11-01', '2026-11-15', NULL),
+
+    -- Пятое издание
+    ('Артём', 'Лебедев', 5, 1, 2, '2026-09-10', '2026-09-24', '2026-09-20'),
+    ('Екатерина', 'Попова', 5, 2, 4, '2026-10-12', '2026-10-26', '2026-10-25'),
+
+    -- Шестое издание
+    ('Иван', 'Соколов', 6, 1, 1, '2026-11-05', '2026-11-19', NULL),
+    ('Мария', 'Волкова', 6, 2, 2, '2026-09-20', '2026-10-04', '2026-10-02'),
+
+    -- Седьмое издание
+    ('Павел', 'Морозов', 7, 1, 3, '2026-08-15', '2026-08-29', '2026-08-28'),
+    ('Артём', 'Лебедев', 7, 2, 4, '2026-10-25', '2026-11-08', NULL),
+
+    -- Восьмое издание
+    ('Екатерина', 'Попова', 8, 1, 1, '2026-09-05', '2026-09-19', '2026-09-17'),
+    ('Иван', 'Соколов', 8, 2, 2, '2026-11-10', '2026-11-24', NULL),
+
+    -- Девятое издание
+    ('Мария', 'Волкова', 9, 1, 3, '2026-08-20', '2026-09-03', '2026-09-01'),
+    ('Павел', 'Морозов', 9, 2, 4, '2026-10-15', '2026-10-29', '2026-10-27'),
+
+    -- Десятое издание
+    ('Артём', 'Лебедев', 10, 1, 1, '2026-11-02', '2026-11-16', NULL),
+    ('Екатерина', 'Попова', 10, 2, 2, '2026-09-25', '2026-10-09', '2026-10-08'),
+
+    -- Одиннадцатое издание
+    ('Иван', 'Соколов', 11, 1, 3, '2026-08-10', '2026-08-24', '2026-08-23'),
+    ('Мария', 'Волкова', 11, 2, 4, '2026-10-30', '2026-11-13', NULL),
+
+    -- Двенадцатое издание
+    ('Павел', 'Морозов', 12, 1, 1, '2026-09-12', '2026-09-26', '2026-09-25'),
+    ('Артём', 'Лебедев', 12, 2, 2, '2026-11-12', '2026-11-26', NULL)
+
+) AS v(first_name, last_name, edition_id, copy_number,
+       employee_id, loan_date, due_date, return_date)
+
+JOIN readers r
+    ON r.first_name = v.first_name
+   AND r.last_name = v.last_name
+
+JOIN copies c
+    ON c.id_edition = v.edition_id
+   AND c.id_copy = (
+       SELECT c2.id_copy
+       FROM copies c2
+       WHERE c2.id_edition = v.edition_id
+       ORDER BY c2.id_copy
+       OFFSET v.copy_number - 1
+       LIMIT 1
+   )
+
+JOIN employees emp
+    ON emp.id_employee = v.employee_id;
 
 UPDATE copies c
 SET last_loan_date = l.last_loan
